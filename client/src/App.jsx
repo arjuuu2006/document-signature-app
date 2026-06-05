@@ -2,8 +2,6 @@ import { useState } from "react";
 import axios from "axios";
 import { Document, Page, pdfjs } from "react-pdf";
 
-
-
 pdfjs.GlobalWorkerOptions.workerSrc =
   new URL(
     "pdfjs-dist/build/pdf.worker.min.mjs",
@@ -21,6 +19,12 @@ function App() {
   const [selectedPdf, setSelectedPdf] = useState("");
   const [numPages, setNumPages] = useState(null);
 
+  // Signature Placeholder
+  const [signature] = useState({
+    x: 200,
+    y: 300,
+  });
+
   const registerUser = async () => {
     try {
       const res = await axios.post(
@@ -34,7 +38,10 @@ function App() {
 
       alert(res.data.message);
     } catch (error) {
-      alert(error.response?.data?.message || "Registration Failed");
+      alert(
+        error.response?.data?.message ||
+          "Registration Failed"
+      );
     }
   };
 
@@ -48,11 +55,17 @@ function App() {
         }
       );
 
-      localStorage.setItem("token", res.data.token);
+      localStorage.setItem(
+        "token",
+        res.data.token
+      );
 
       alert("Login Successful");
     } catch (error) {
-      alert(error.response?.data?.message || "Login Failed");
+      alert(
+        error.response?.data?.message ||
+          "Login Failed"
+      );
     }
   };
 
@@ -76,11 +89,22 @@ function App() {
   };
 
   return (
-    <div style={{ padding: "40px", textAlign: "center" }}>
+    <div
+      style={{
+        padding: "40px",
+        textAlign: "center",
+      }}
+    >
       <h1>Document Signature App</h1>
 
-      <button onClick={() => setIsLogin(!isLogin)}>
-        {isLogin ? "Go to Register" : "Go to Login"}
+      <button
+        onClick={() =>
+          setIsLogin(!isLogin)
+        }
+      >
+        {isLogin
+          ? "Go to Register"
+          : "Go to Login"}
       </button>
 
       {isLogin ? (
@@ -91,7 +115,9 @@ function App() {
             type="email"
             placeholder="Email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) =>
+              setEmail(e.target.value)
+            }
           />
 
           <br />
@@ -101,13 +127,17 @@ function App() {
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
           />
 
           <br />
           <br />
 
-          <button onClick={loginUser}>Login</button>
+          <button onClick={loginUser}>
+            Login
+          </button>
 
           <br />
           <br />
@@ -139,16 +169,44 @@ function App() {
             <div>
               <h2>PDF Preview</h2>
 
-              <Document
-                file={selectedPdf}
-                onLoadSuccess={({ numPages }) =>
-                  setNumPages(numPages)
-                }
+              <div
+                style={{
+                  position: "relative",
+                  display: "inline-block",
+                }}
               >
-                <Page pageNumber={1} />
-              </Document>
+                <Document
+                  file={selectedPdf}
+                  onLoadSuccess={({
+                    numPages,
+                  }) =>
+                    setNumPages(numPages)
+                  }
+                >
+                  <Page pageNumber={1} />
+                </Document>
 
-              <p>Total Pages: {numPages}</p>
+                <div
+                  style={{
+                    position: "absolute",
+                    left: `${signature.x}px`,
+                    top: `${signature.y}px`,
+                    backgroundColor:
+                      "yellow",
+                    padding: "5px 10px",
+                    border:
+                      "2px solid red",
+                    fontWeight: "bold",
+                    zIndex: 1000,
+                  }}
+                >
+                  SIGN HERE
+                </div>
+              </div>
+
+              <p>
+                Total Pages: {numPages}
+              </p>
             </div>
           )}
         </div>
@@ -160,7 +218,9 @@ function App() {
             type="text"
             placeholder="Name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) =>
+              setName(e.target.value)
+            }
           />
 
           <br />
@@ -170,7 +230,9 @@ function App() {
             type="email"
             placeholder="Email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) =>
+              setEmail(e.target.value)
+            }
           />
 
           <br />
@@ -180,13 +242,17 @@ function App() {
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
           />
 
           <br />
           <br />
 
-          <button onClick={registerUser}>
+          <button
+            onClick={registerUser}
+          >
             Register
           </button>
         </div>

@@ -21,9 +21,12 @@ app.use(
 // Routes
 const authRoutes = require("./routes/authRoutes");
 const documentRoutes = require("./routes/documentRoutes");
+const signatureRoutes = require("./routes/signatureRoutes");
 
+// Route Middleware
 app.use("/api/auth", authRoutes);
 app.use("/api/docs", documentRoutes);
+app.use("/api/signatures", signatureRoutes);
 
 // MongoDB Connection
 mongoose
