@@ -13,7 +13,10 @@ app.use(cors());
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
+const documentRoutes = require("./routes/documentRoutes");
+
 app.use("/api/auth", authRoutes);
+app.use("/api/docs", documentRoutes);
 
 // MongoDB Connection
 mongoose
