@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const path = require("path");
 
 dotenv.config();
 
@@ -10,6 +11,12 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors());
+
+// Serve uploaded PDF files
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"))
+);
 
 // Routes
 const authRoutes = require("./routes/authRoutes");

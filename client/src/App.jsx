@@ -1,5 +1,14 @@
 import { useState } from "react";
 import axios from "axios";
+import { Document, Page, pdfjs } from "react-pdf";
+
+
+
+pdfjs.GlobalWorkerOptions.workerSrc =
+  new URL(
+    "pdfjs-dist/build/pdf.worker.min.mjs",
+    import.meta.url
+  ).toString();
 
 function App() {
   const [isLogin, setIsLogin] = useState(true);
@@ -7,6 +16,10 @@ function App() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const [documents, setDocuments] = useState([]);
+  const [selectedPdf, setSelectedPdf] = useState("");
+  const [numPages, setNumPages] = useState(null);
 
   const registerUser = async () => {
     try {
@@ -38,9 +51,27 @@ function App() {
       localStorage.setItem("token", res.data.token);
 
       alert("Login Successful");
-      console.log(res.data.token);
     } catch (error) {
       alert(error.response?.data?.message || "Login Failed");
+    }
+  };
+
+  const loadDocuments = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(
+        "http://localhost:5001/api/docs/my-documents",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setDocuments(res.data);
+    } catch (error) {
+      alert("Failed to load documents");
     }
   };
 
@@ -77,6 +108,49 @@ function App() {
           <br />
 
           <button onClick={loginUser}>Login</button>
+
+          <br />
+          <br />
+
+          <button onClick={loadDocuments}>
+            Load My Documents
+          </button>
+
+          <br />
+          <br />
+
+          {documents.map((doc) => (
+            <div key={doc._id}>
+              <button
+                onClick={() =>
+                  setSelectedPdf(
+                    `http://localhost:5001/${doc.filepath}`
+                  )
+                }
+              >
+                {doc.filename}
+              </button>
+            </div>
+          ))}
+
+          <br />
+
+          {selectedPdf && (
+            <div>
+              <h2>PDF Preview</h2>
+
+              <Document
+                file={selectedPdf}
+                onLoadSuccess={({ numPages }) =>
+                  setNumPages(numPages)
+                }
+              >
+                <Page pageNumber={1} />
+              </Document>
+
+              <p>Total Pages: {numPages}</p>
+            </div>
+          )}
         </div>
       ) : (
         <div>
@@ -112,7 +186,9 @@ function App() {
           <br />
           <br />
 
-          <button onClick={registerUser}>Register</button>
+          <button onClick={registerUser}>
+            Register
+          </button>
         </div>
       )}
     </div>

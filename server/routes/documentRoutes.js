@@ -6,6 +6,7 @@ const protect = require("../middleware/authMiddleware");
 
 const {
   uploadDocument,
+  getDocuments,
 } = require("../controllers/documentController");
 
 router.post(
@@ -13,6 +14,12 @@ router.post(
   protect,
   upload.single("pdf"),
   uploadDocument
+);
+
+router.get(
+  "/my-documents",
+  protect,
+  getDocuments
 );
 
 module.exports = router;

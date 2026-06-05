@@ -1,5 +1,6 @@
 const Document = require("../models/document");
 
+// Upload Document
 const uploadDocument = async (req, res) => {
   try {
     const document = await Document.create({
@@ -19,6 +20,22 @@ const uploadDocument = async (req, res) => {
   }
 };
 
+// Get User Documents
+const getDocuments = async (req, res) => {
+  try {
+    const documents = await Document.find({
+      uploadedBy: req.user.id,
+    });
+
+    res.status(200).json(documents);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   uploadDocument,
+  getDocuments,
 };
