@@ -2,6 +2,7 @@ const Signature = require("../models/signature");
 const fs = require("fs");
 const path = require("path");
 const { PDFDocument } = require("pdf-lib");
+const { v4: uuidv4 } = require("uuid");
 const Document = require("../models/document");
 
 const createSignature = async (req, res) => {
@@ -9,15 +10,21 @@ const createSignature = async (req, res) => {
   try {
     const { fileId, signer, x, y } = req.body;
 
-    const signature = await Signature.create({
-      fileId,
-      signer,
-      x,
-      y,
-    });
+   const token = uuidv4();
 
-    res.status(201).json(signature);
-  } catch (error) {
+const signature = await Signature.create({
+  fileId,
+  signer,
+  x,
+  y,
+  token,
+});
+
+res.status(201).json({
+  message: "Signature created",
+  signature,
+  publicLink: `http://localhost:5001/sign/${token}`,
+});  } catch (error) {
     res.status(500).json({
       message: error.message,
     });
