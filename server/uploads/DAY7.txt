@@ -1,0 +1,7 @@
+Day 7 Completed
+
+- Register API tested
+- Login API tested
+- Documents API tested
+- Signature API tested
+- UI and Backend integration verified
