@@ -17,13 +17,22 @@ function App() {
 
   const [documents, setDocuments] = useState([]);
   const [selectedPdf, setSelectedPdf] = useState("");
+  const [selectedFileId, setSelectedFileId] = useState("");
   const [numPages, setNumPages] = useState(null);
 
-  // Signature Placeholder
-  const [signature] = useState({
-    x: 200,
-    y: 300,
+const [signature, setSignature] = useState({
+  x: 200,
+  y: 300,
+});
+
+const handleMove = (e) => {
+  const rect = e.currentTarget.getBoundingClientRect();
+
+  setSignature({
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top,
   });
+};
 
   const registerUser = async () => {
     try {
@@ -87,6 +96,63 @@ function App() {
       alert("Failed to load documents");
     }
   };
+  const saveSignaturePosition = async () => {
+  try {
+    await axios.post(
+      "http://localhost:5001/api/signatures",
+      {
+        fileId: selectedFileId,
+        signer: "Arjun",
+        x: signature.x,
+        y: signature.y,
+      }
+    );
+
+    const loadSignaturePosition = async (fileId) => {
+  try {
+    const res = await axios.get(
+      `http://localhost:5001/api/signatures/${fileId}`
+    );
+
+    if (res.data.length > 0) {
+      const latestSignature =
+        res.data[res.data.length - 1];
+
+      setSignature({
+        x: latestSignature.x,
+        y: latestSignature.y,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+    alert("Signature Position Saved");
+  } catch (error) {
+    console.log(error);
+    alert("Failed to Save Position");
+  }
+};
+const loadSignaturePosition = async (fileId) => {
+  try {
+    const res = await axios.get(
+      `http://localhost:5001/api/signatures/${fileId}`
+    );
+
+    if (res.data.length > 0) {
+      const latestSignature =
+        res.data[res.data.length - 1];
+
+      setSignature({
+        x: latestSignature.x,
+        y: latestSignature.y,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   return (
     <div
@@ -152,11 +218,15 @@ function App() {
           {documents.map((doc) => (
             <div key={doc._id}>
               <button
-                onClick={() =>
-                  setSelectedPdf(
-                    `http://localhost:5001/${doc.filepath}`
-                  )
-                }
+    onClick={() => {
+  setSelectedPdf(
+    `http://localhost:5001/${doc.filepath}`
+  );
+
+  setSelectedFileId(doc._id);
+
+  loadSignaturePosition(doc._id);
+}}
               >
                 {doc.filename}
               </button>
@@ -170,11 +240,13 @@ function App() {
               <h2>PDF Preview</h2>
 
               <div
-                style={{
-                  position: "relative",
-                  display: "inline-block",
-                }}
-              >
+  onClick={handleMove}
+  style={{
+    position: "relative",
+    display: "inline-block",
+    cursor: "crosshair",
+  }}
+>
                 <Document
                   file={selectedPdf}
                   onLoadSuccess={({
@@ -207,6 +279,14 @@ function App() {
               <p>
                 Total Pages: {numPages}
               </p>
+              <p>
+  X: {Math.round(signature.x)} | Y: {Math.round(signature.y)}
+</p>
+<br />
+
+<button onClick={saveSignaturePosition}>
+  Save Signature Position
+</button>
             </div>
           )}
         </div>
