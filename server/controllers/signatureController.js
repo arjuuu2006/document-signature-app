@@ -1,4 +1,5 @@
 const Signature = require("../models/signature");
+const Audit = require("../models/audit");
 const fs = require("fs");
 const path = require("path");
 const { PDFDocument } = require("pdf-lib");
@@ -18,6 +19,12 @@ const signature = await Signature.create({
   x,
   y,
   token,
+});
+
+await Audit.create({
+  fileId,
+  signer,
+  ipAddress: req.ip,
 });
 
 res.status(201).json({
