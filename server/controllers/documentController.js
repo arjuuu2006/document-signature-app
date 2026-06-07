@@ -34,8 +34,27 @@ const getDocuments = async (req, res) => {
     });
   }
 };
+const updateDocumentStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const document = await Document.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    res.status(200).json(document);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   uploadDocument,
   getDocuments,
+  updateDocumentStatus,
 };

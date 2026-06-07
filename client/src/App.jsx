@@ -14,6 +14,11 @@ function App() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [statusFilter, setStatusFilter] =
+  useState("all");
+
+const [signatures, setSignatures] =
+  useState([]);
 
   const [documents, setDocuments] = useState([]);
   const [selectedPdf, setSelectedPdf] = useState("");
@@ -23,6 +28,8 @@ function App() {
 const [signature, setSignature] = useState({
   x: 200,
   y: 300,
+
+  
 });
 
 const handleMove = (e) => {
@@ -79,24 +86,48 @@ const handleMove = (e) => {
   };
 
   const loadDocuments = async () => {
-    try {
-      const token = localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
 
-      const res = await axios.get(
-        "http://localhost:5001/api/docs/my-documents",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    const res = await axios.get(
+      "http://localhost:5001/api/docs/my-documents",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      setDocuments(res.data);
-    } catch (error) {
-      alert("Failed to load documents");
-    }
-  };
-  const saveSignaturePosition = async () => {
+    setDocuments(res.data);
+  } catch (error) {
+    alert("Failed to load documents");
+  }
+};
+
+const updateStatus = async (id, status) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    await axios.put(
+      `http://localhost:5001/api/docs/status/${id}`,
+      { status },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    loadDocuments();
+
+    alert(`Document ${status}`);
+  } catch (error) {
+    console.log(error);
+    alert("Failed to update status");
+  }
+};
+
+const saveSignaturePosition = async () => {
   try {
     await axios.post(
       "http://localhost:5001/api/signatures",
@@ -108,37 +139,17 @@ const handleMove = (e) => {
       }
     );
 
-    const loadSignaturePosition = async (fileId) => {
-  try {
-    const res = await axios.get(
-      `http://localhost:5001/api/signatures/${fileId}`
-    );
-
-    if (res.data.length > 0) {
-      const latestSignature =
-        res.data[res.data.length - 1];
-
-      setSignature({
-        x: latestSignature.x,
-        y: latestSignature.y,
-      });
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
-
     alert("Signature Position Saved");
   } catch (error) {
     console.log(error);
     alert("Failed to Save Position");
   }
 };
+
 const loadSignaturePosition = async (fileId) => {
   try {
     const res = await axios.get(
-      `http://localhost:5001/api/signatures/${fileId}`
-    );
+`http://localhost:5001/api/signatures/${fileId}`    );
 
     if (res.data.length > 0) {
       const latestSignature =
@@ -154,15 +165,14 @@ const loadSignaturePosition = async (fileId) => {
   }
 };
 
-  return (
-    <div
-      style={{
-        padding: "40px",
-        textAlign: "center",
-      }}
-    >
-      <h1>Document Signature App</h1>
+ 
 
+
+  return (
+   <div className="min-h-screen bg-slate-100 p-10 text-center">
+<h1 className="text-5xl font-bold text-blue-600">
+  Document Signature App
+</h1>
       <button
         onClick={() =>
           setIsLogin(!isLogin)
@@ -176,47 +186,75 @@ const loadSignaturePosition = async (fileId) => {
       {isLogin ? (
         <div>
           <h2>Login</h2>
+<input
+  className="w-full border p-3 rounded-lg"
+  type="email"
+  placeholder="Email"
+  value={email}
+  onChange={(e) =>
+    setEmail(e.target.value)
+  }
+/>
+
+          <br />
+          <br />
 
           <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) =>
-              setEmail(e.target.value)
-            }
-          />
+  className="w-full border p-3 rounded-lg"
+  type="password"
+  placeholder="Password"
+  value={password}
+  onChange={(e) =>
+    setPassword(e.target.value)
+  }
+/>
+          <br />
+          <br />
+
+          <button
+  onClick={loginUser}
+  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+>
+  Login
+</button>
 
           <br />
           <br />
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
-          />
+         <button
+  onClick={loadDocuments}
+  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+>
+  Load My Documents
+</button>
+<br />
+<br />
 
+<select
+  value={statusFilter}
+  onChange={(e) =>
+    setStatusFilter(e.target.value)
+  }
+  className="border p-2 rounded-lg"
+>
+  <option value="all">All</option>
+  <option value="Pending">Pending</option>
+  <option value="Signed">Signed</option>
+  <option value="Rejected">Rejected</option>
+</select>
+
+<br />
+<br />
           <br />
           <br />
 
-          <button onClick={loginUser}>
-            Login
-          </button>
-
-          <br />
-          <br />
-
-          <button onClick={loadDocuments}>
-            Load My Documents
-          </button>
-
-          <br />
-          <br />
-
-          {documents.map((doc) => (
-            <div key={doc._id}>
+{documents
+  .filter((doc) =>
+    statusFilter === "all"
+      ? true
+      : doc.status === statusFilter
+  )
+  .map((doc) => (            <div key={doc._id}>
               <button
     onClick={() => {
   setSelectedPdf(
@@ -228,8 +266,25 @@ const loadSignaturePosition = async (fileId) => {
   loadSignaturePosition(doc._id);
 }}
               >
-                {doc.filename}
-              </button>
+{doc.filename} ({doc.status})              
+</button>
+<div className="space-x-2">
+  <button
+    onClick={() =>
+      updateStatus(doc._id, "Signed")
+    }
+  >
+    Sign
+  </button>
+
+  <button
+    onClick={() =>
+      updateStatus(doc._id, "Rejected")
+    }
+  >
+    Reject
+  </button>
+</div>
             </div>
           ))}
 
@@ -293,48 +348,45 @@ const loadSignaturePosition = async (fileId) => {
       ) : (
         <div>
           <h2>Register</h2>
+<input
+  className="w-full border p-3 rounded-lg"
+  type="text"
+  placeholder="Name"
+  value={name}
+  onChange={(e) => setName(e.target.value)}
+/>
 
-          <input
-            type="text"
-            placeholder="Name"
-            value={name}
-            onChange={(e) =>
-              setName(e.target.value)
-            }
-          />
+<br />
+<br />
 
-          <br />
-          <br />
+<input
+  className="w-full border p-3 rounded-lg"
+  type="email"
+  placeholder="Email"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+/>
 
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) =>
-              setEmail(e.target.value)
-            }
-          />
+<br />
+<br />
 
-          <br />
-          <br />
-
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
-          />
+<input
+  className="w-full border p-3 rounded-lg"
+  type="password"
+  placeholder="Password"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+/>
 
           <br />
           <br />
 
-          <button
-            onClick={registerUser}
-          >
-            Register
-          </button>
+         <button
+  onClick={registerUser}
+  className="bg-purple-600 text-white px-6 py-2 rounded-lg"
+>
+  Register
+</button>
         </div>
       )}
     </div>

@@ -7,6 +7,7 @@ const protect = require("../middleware/authMiddleware");
 const {
   uploadDocument,
   getDocuments,
+  updateDocumentStatus,
 } = require("../controllers/documentController");
 
 router.post(
@@ -20,6 +21,11 @@ router.get(
   "/my-documents",
   protect,
   getDocuments
+);
+router.put(
+  "/status/:id",
+  protect,
+  updateDocumentStatus
 );
 
 module.exports = router;

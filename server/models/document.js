@@ -16,10 +16,14 @@ const documentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+
+    status: {
+      type: String,
+      enum: ["Pending", "Signed", "Rejected"],
+      default: "Pending",
+    },
   },
   { timestamps: true }
 );
 
 module.exports = mongoose.model("Document", documentSchema);
-
-
