@@ -7,31 +7,31 @@ const { v4: uuidv4 } = require("uuid");
 const Document = require("../models/document");
 
 const createSignature = async (req, res) => {
-
   try {
     const { fileId, signer, x, y } = req.body;
 
-   const token = uuidv4();
+    const token = uuidv4();
 
-const signature = await Signature.create({
-  fileId,
-  signer,
-  x,
-  y,
-  token,
-});
+    const signature = await Signature.create({
+      fileId,
+      signer,
+      x,
+      y,
+      token,
+    });
 
-await Audit.create({
-  fileId,
-  signer,
-  ipAddress: req.ip,
-});
+    await Audit.create({
+      fileId,
+      signer,
+      ipAddress: req.ip,
+    });
 
-res.status(201).json({
-  message: "Signature created",
-  signature,
-  publicLink: `http://localhost:5001/sign/${token}`,
-});  } catch (error) {
+    res.status(201).json({
+      message: "Signature created",
+      signature,
+      publicLink: `http://localhost:5001/sign/${token}`,
+    });
+  } catch (error) {
     res.status(500).json({
       message: error.message,
     });
@@ -71,7 +71,6 @@ const generateSignedPdf = async (req, res) => {
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
     const pages = pdfDoc.getPages();
-
     const firstPage = pages[0];
 
     signatures.forEach((sig) => {
@@ -102,8 +101,30 @@ const generateSignedPdf = async (req, res) => {
     });
   }
 };
+
+const updateSignatureStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    console.log("Received ID:", req.params.id);
+
+    const signature = await Signature.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+
+    res.status(200).json(signature);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createSignature,
   getSignatures,
   generateSignedPdf,
+  updateSignatureStatus,
 };

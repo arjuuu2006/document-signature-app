@@ -26,11 +26,11 @@ const signatureSchema = new mongoose.Schema(
       required: true,
     },
 
-    status: {
-      type: String,
-      enum: ["pending", "signed"],
-      default: "pending",
-    },
+   status: {
+  type: String,
+  enum: ["pending", "signed", "rejected"],
+  default: "pending",
+},
   },
   {
     timestamps: true,
