@@ -23,13 +23,14 @@ const authRoutes = require("./routes/authRoutes");
 const documentRoutes = require("./routes/documentRoutes");
 const signatureRoutes = require("./routes/signatureRoutes");
 const auditRoutes = require("./routes/auditRoutes");
+const receiverRoutes = require("./routes/receiverRoutes");
 
 // Route Middleware
 app.use("/api/auth", authRoutes);
 app.use("/api/docs", documentRoutes);
 app.use("/api/signatures", signatureRoutes);
 app.use("/api/audit", auditRoutes);
-
+app.use("/api/receivers", receiverRoutes);
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI)
